@@ -54,21 +54,13 @@ class DataHandler {
                             reject("No such user");
                         }
                         else {
-                            this.userTokens[this.generateToken(email)] = result[0];
-                            resolve({ email: email, id: result[0], password: password });
+                            const token = this.generateToken(email);
+                            this.userTokens[token] = result[0];
+                            resolve({ email: email, id: result[0].id, password: password, token });
                         }
                     }
                 }));
             }
-        });
-    }
-    buy(token) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return new Promise((resolve, reject) => {
-                if (!this.connection) {
-                    reject("Connection is empty!");
-                }
-            });
         });
     }
     getItems() {
@@ -84,14 +76,69 @@ class DataHandler {
             });
         });
     }
-    getOrders() {
+    createOrder(phone, name, foodList) {
         return __awaiter(this, void 0, void 0, function* () {
             return new Promise((resolve, reject) => {
-                this.connection.query(`select * from foodOrder`, (err, result) => __awaiter(this, void 0, void 0, function* () {
+                let insertString = `insert into foodOrder (itemIds, customerPhone, customerName) VALUES (${foodList.join(";")}, ${phone}, ${name});`;
+                this.connection.query(insertString, (err, result) => __awaiter(this, void 0, void 0, function* () {
                     if (err)
                         reject(err);
                     else {
-                        resolve(JSON.parse(JSON.stringify(result)));
+                        resolve(true);
+                    }
+                }));
+            });
+        });
+    }
+    getSpecificFood(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve, reject) => {
+                this.connection.query(`select * from item where id = ${id}`, (err, result) => __awaiter(this, void 0, void 0, function* () {
+                    if (err)
+                        reject(err);
+                    else {
+                        resolve(JSON.parse(JSON.stringify(result[0])));
+                    }
+                }));
+            });
+        });
+    }
+    getOrders(token) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve, reject) => {
+                if (!this.userTokens[token]) {
+                    reject("Invalid Token");
+                }
+                else {
+                    this.connection.query(`select * from foodOrder`, (err, result) => __awaiter(this, void 0, void 0, function* () {
+                        if (err)
+                            reject(err);
+                        else {
+                            let foodArr = [];
+                            result[1].itemIds.split(";").forEach((foodElement) => __awaiter(this, void 0, void 0, function* () {
+                                foodArr.push(yield this.getSpecificFood(foodElement));
+                            }));
+                            setInterval(() => {
+                                resolve([{
+                                        name: result[0].customerName,
+                                        phone: result[0].customerPhone,
+                                        order: foodArr
+                                    }]);
+                            }, 200);
+                        }
+                    }));
+                }
+            });
+        });
+    }
+    deleteOrder(token, orderId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve, reject) => {
+                this.connection.query(`delete from foodOrder where id = ${orderId}`, (err, result) => __awaiter(this, void 0, void 0, function* () {
+                    if (err)
+                        reject(err);
+                    else {
+                        resolve(true);
                     }
                 }));
             });

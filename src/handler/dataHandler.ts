@@ -42,19 +42,12 @@ export default class DataHandler {
                         if (result.length <= 0) {
                             reject("No such user")
                         } else {
-                            this.userTokens[this.generateToken(email)] = result[0];
-                            resolve({ email: email, id: result[0], password: password });
+                            const token = this.generateToken(email);
+                            this.userTokens[token] = result[0];
+                            resolve({ email: email, id: result[0].id, password: password, token });
                         }
                     }
                 });
-            }
-        })
-    }
-
-    public async buy(token: string): Promise<boolean> {
-        return new Promise((resolve, reject) => {
-            if (!this.connection) {
-                reject("Connection is empty!")
             }
         })
     }
@@ -70,12 +63,60 @@ export default class DataHandler {
         })
     }
 
-    public async getOrders(): Promise<FoodOrder[]> {
+    public async createOrder(phone: string, name: string, foodList: number[]): Promise<boolean>{
         return new Promise((resolve, reject) => {
-            this.connection.query(`select * from foodOrder`, async (err, result) => {
+            let insertString = `insert into foodOrder (itemIds, customerPhone, customerName) VALUES (${foodList.join(";")}, ${phone}, ${name});`; 
+            this.connection.query(insertString, async (err, result) => {
                 if (err) reject(err)
                 else {
-                    resolve(JSON.parse(JSON.stringify(result)));
+                    resolve(true);
+                }
+            });
+        })
+    }
+
+    public async getSpecificFood(id: number): Promise<Item>{
+        return new Promise((resolve, reject) => {
+            this.connection.query(`select * from item where id = ${id}`, async (err, result) => {
+                if (err) reject(err)
+                else {
+                    resolve(JSON.parse(JSON.stringify(result[0])));
+                }
+            });
+        })
+    }
+
+    public async getOrders(token: string): Promise<any> {
+        return new Promise((resolve, reject) => {
+            if(!this.userTokens[token]){
+                reject("Invalid Token");
+            }else{
+                this.connection.query(`select * from foodOrder`, async (err, result) => {
+                    if (err) reject(err)
+                    else {
+                        let foodArr : Item[] = [];
+                        result[1].itemIds.split(";").forEach(async (foodElement: number) => {
+                            foodArr.push(await this.getSpecificFood(foodElement));
+                        });
+                        setInterval(() => {
+                            resolve([{
+                                name: result[0].customerName,
+                                phone: result[0].customerPhone,
+                                order: foodArr
+                            }]);
+                        }, 200)
+                    }
+                });
+            }
+        })
+    }
+
+    public async deleteOrder(token: string, orderId: number): Promise<boolean>{
+        return new Promise((resolve, reject) => {
+            this.connection.query(`delete from foodOrder where id = ${orderId}`, async (err, result) => {
+                if (err) reject(err)
+                else {
+                    resolve(true);
                 }
             });
         })
@@ -92,5 +133,6 @@ export default class DataHandler {
             .digest('hex');
         return hash;
     }
+    
 
 }

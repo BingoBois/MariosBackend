@@ -6,9 +6,10 @@ export interface Item{
 }
 
 export interface User{
-    id?: number;
 	email: string;
     password: string;
+    token?: string;
+    id?: number;
 }
 
 export interface FoodOrder{
@@ -19,4 +20,10 @@ export interface FoodOrder{
 
 export interface token{
     [token: string] : number;
+}
+
+interface IFoodOrder {
+    name: string;
+    phone: string;
+    order: Item[]
 }

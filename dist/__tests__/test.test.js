@@ -50,4 +50,45 @@ describe('Marios Pizza Tests', () => {
             done();
         }
     }));
+    test("Trying to get orders while not being granted", (done) => __awaiter(this, void 0, void 0, function* () {
+        try {
+            const orders = yield dataHandler.getOrders("sutmig");
+        }
+        catch (err) {
+            expect(err).toEqual("Invalid Token");
+        }
+        finally {
+            done();
+        }
+    }));
+    test("Successfully getting orders", (done) => __awaiter(this, void 0, void 0, function* () {
+        try {
+            const user = yield dataHandler.login("vikto@live.com", "sutmig");
+            if (user.token) {
+                const orders = yield dataHandler.getOrders(user.token);
+            }
+        }
+        catch (err) {
+            expect(err).toEqual(null);
+        }
+        finally {
+            done();
+        }
+    }));
+    test("Successfully getting orders", (done) => __awaiter(this, void 0, void 0, function* () {
+        try {
+            const user = yield dataHandler.login("vikto@live.com", "sutmig");
+            if (user.token) {
+                const orders = yield dataHandler.getOrders(user.token);
+                expect(orders.length).toBeGreaterThan(0);
+            }
+        }
+        catch (err) {
+        }
+        finally {
+            done();
+        }
+    }));
+    test("Verify that orders can be created", (done) => __awaiter(this, void 0, void 0, function* () {
+    }));
 });
