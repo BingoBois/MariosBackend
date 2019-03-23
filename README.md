@@ -15,7 +15,16 @@ Made by:
 - Open another terminal and run the command: `npm start`
 
 ### TDD
-The project was written using an interface, and implementing tests based on that interface. You can check the tests out in `test.test.ts`, where they are implemented based on the description given in the project assignment
+The project was written using an interface, and implementing tests based on that interface. You can check the tests out in `test.test.ts`, where they are implemented based on the description given in the project assignment.
+
+The pizzaria wanted the following features:
+
+ - Admin Login
+ - Customer Creates orders
+ - Admin be able to view orders and update their status
+ - Customers being able to view all items available
+
+ The only thing that changed constantly, was the input or output needed, since the backend and frontend were created at seperate times, mostly in order to forfill the needs of the frontend.
 
 ### Documentation
 The following API's are available
