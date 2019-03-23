@@ -75,6 +75,8 @@ describe('Marios Pizza Tests', () => {
     });
 
     test("Verify that orders can be created", async (done) => {
-            
+            expect(await dataHandler.createOrder("vikto@live.com",
+            [1,2,1,2]
+            )).toEqual(true);
     })
 })
